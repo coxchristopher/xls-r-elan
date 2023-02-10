@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Anything outside of the RECOGNIZER element can be left untouched -->
+<CMD CMDVersion="1.1" xmlns="http://www.clarin.eu/cmd/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.clarin.eu/cmd/ http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1430905751617/xsd">
+    <!-- See http://catalog.clarin.eu/ds/ComponentRegistry?registrySpace=published&itemId=clarin.eu:cr1:p_1430905751617 -->
+    <Header></Header>
+    <Resources>
+        <ResourceProxyList></ResourceProxyList>
+        <JournalFileProxyList></JournalFileProxyList>
+        <ResourceRelationList></ResourceRelationList>
+    </Resources>
+    <Components>
+        <RECOGNIZER>
+            <!--
+            For Recognizer API extensions the regonizerType is "direct", for stand-alone components running on the same
+            computer the type should be "local". That are currently the types supported by ELAN.
+            For "direct" the "run" attributes (runMac etc.) should have the value of the fully qualified name of the 
+            class implementing "Recognizer.java". For "local" the executable command per platform should be the value.
+            The "info" element contains the name as it will be shown in the user interface. Try to define a name
+            that makes it likely to be unique, e.g by including an institution or university acronym.
+            -->
+            <recognizer recognizerType="local" runLinux="./xls-r-elan.sh" runMac="./xls-r-elan.sh" runWin=""
+                info="XLS-R speech recognition">XLS_R_Speech_Recognition</recognizer>
+
+            <!-- For a more detailed documentation, a HTML file linked to the recognizer. This HTML ships with the 
+                 recognizer and gives extra explanations for using the recognizer and information about licenses, 
+                 authors and contacting them, version numbers etc. The link can be either a relative link to a file
+                 in the same directory tree as the CMDI file or (not recommended) a direct http link to a recognizer 
+                 homepage elsewhere. 
+            -->
+            <documentation>xls-r-elan.html</documentation>
+
+            <!--
+            Any number of input and output parameters can be specified.
+            At least one input element (of type audio, video or timeseries) should be specified.
+            Other input and output types (tier, timeseries etc.) and their required formats are described 
+            in the interfacing specification at https://tla.mpi.nl/projects_info/auvis/#more-7066 and 
+            https://tla.mpi.nl/projects_info/avatech/
+            (https://tla.mpi.nl/wp-content/uploads/2012/08/Avatech-interface-spec-2014-03-06.pdf)
+            -->
+            <input level="basic" type="audio" optional="false"
+                info="Input audio file">source</input>
+
+            <input level="basic" type="tier" optional="true"
+                info="Input tier">input_tier</input>
+
+            <textparam level="basic" convoc="Transcribe Retone" 
+                default="Transcribe"
+                info="Transcribe from scratch or retone existing text?">mode</textparam>
+
+            <input level="basic" type="auxiliary" optional="true"
+                mimetypes="text/*"
+                info="Tsuut'ina text corpus (for word beam search; optional)">corpus</input>
+
+            <output level="basic" type="tier" optional="false"
+                mimetypes="text/xml"
+                info="Output recognized segments">output_tier</output>
+        </RECOGNIZER>
+    </Components>
+</CMD>
