@@ -127,7 +127,7 @@ citation:
 > Cox, Christopher. 2023. XLS-R-ELAN: An implementation of XLS-R automatic speech recognition as a recognizer for ELAN. Version 0.1.0.
 
 ```
-@manual{cox22xlsrelan,
+@manual{cox23xlsrelan,
     title = {XLS-R-ELAN: An implementation of XLS-R automatic speech recognition as a recognizer for ELAN},
     author = {Christopher Cox},
     year = {2023}
