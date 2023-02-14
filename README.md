@@ -11,7 +11,7 @@ This repository also contains several scripts used to fine-tune XLS-R models
 using [Digital Research Alliance of Canada](https://alliancecan.ca)
 high-performance computing facilities.  While specific to one specific language
 (Tsuut'ina), both the fine-tuning scripts (Python) and SLURM job definitions
-(sh) found in the `train-srs` directory may be useful as examples of how to
+(sh) found in the `finetune-srs` directory may be useful as examples of how to
 fine-tune XLS-R models, in general.
 
 ## Requirements and installation
