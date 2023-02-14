@@ -7,6 +7,13 @@ XLS-R-ELAN integrates the automatic speech recognition (ASR) methods offered by
 fine-tuned XLS-R ASR models to multimedia sources linked to ELAN transcripts
 from directly within ELAN's user interface.
 
+This repository also contains several scripts used to fine-tune XLS-R models
+using [Digital Research Alliance of Canada](https://alliancecan.ca)
+high-performance computing facilities.  While specific to one specific language
+(Tsuut'ina), both the fine-tuning scripts (Python) and SLURM job definitions
+(sh) found in the `train-srs` directory may be useful as examples of how to
+fine-tune XLS-R models, in general.
+
 ## Requirements and installation
 
 XLS-R-ELAN makes use of several of other open-source applications and
