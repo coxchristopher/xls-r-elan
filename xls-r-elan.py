@@ -5,10 +5,10 @@
 # transcript, returning as output a new tier with the model's predictions for
 # each of the provided annotations (as part of a local recognizer in ELAN).
 #
-# If a corpus (i.e., a text file containing a bunch of Tsuut'ina text) is
-# provided, this recognizer also applies a word beam search (Scheidl 2018),
-# which uses both a dictionary and language model derived from the provided
-# corpus to refine the XLS-R model's predictions.
+# If a corpus (i.e., a text file containing a bunch of text in the target
+# language) is provided, this recognizer also applies a word beam search
+# (Scheidl 2018), which uses both a dictionary and language model derived
+# from the provided corpus to refine the XLS-R model's predictions.
 #
 # See:
 #
@@ -16,19 +16,6 @@
 #   https://github.com/macairececile/internship_lacito_2021/blob/main/notebooks/Fine-Tune%20XLSR-Wav2Vec2%20-%20Na.ipynb
 #   https://github.com/githubharald/CTCWordBeamSearch
 #   https://towardsdatascience.com/word-beam-search-a-ctc-decoding-algorithm-b051d28f3d2e
-
-# TODO: 
-#
-#   * Add some pre-processing to the corpus texts that get submitted! (all
-#     kinds of bizarre Unicode characters can get swapped in, multiple spaces,
-#     etc., all of which should get cleaned up first)
-#
-#   * Retrain the model to (a) not worry about word-initial glottal stops any
-#     more, and (b) to do hyphens, commas, and periods (and if it turns out 
-#     to be terrible at punctuation, handle as much of it in post-hoc adjust-
-#     ments as possible
-#
-# FROMHERE
 
 # Installation notes:
 #
@@ -66,11 +53,13 @@ import numpy as np
 import pydub
 import torch
 import transformers
-import word_beam_search
 
 import retone_srs
 
-asr_model_dir = "/Users/chris/Desktop/TLL/Code/xls-r-elan/wav2vec2-xls-r-300-srs-test1/checkpoint-30400"
+# Minimum duration of annotations to apply ASR to (in milliseconds)
+MIN_ANNOTATION_DUR = 100
+
+asr_model_dir = "/Users/chris/Desktop/TLL/Code/xls-r-elan/wav2vec2-xls-r-300-srs-test1/checkpoint-43700"
 tone_model_dir = "/Users/chris/Desktop/TLL/Code/xls-r-elan/wav2vec2-xls-r-300-srs-tones/checkpoint-30400"
 
 model_dir = asr_model_dir
@@ -133,6 +122,33 @@ else:
     annotations = [a for a in annotations if a['value'].strip()]
     model_dir = tone_model_dir
 
+# If the user has provided a specific XLS-R model checkpoint (i.e., "pytorch_
+# model.bin") that should be used, work with that (once we're sure that it
+# actually exists).
+if 'model' in params: 
+    model_bin = html.unescape(params['model'])
+    if os.path.isfile(model_bin):
+        model_dir = os.path.dirname(os.path.abspath(model_bin))
+
+# By default, XLS-R stores a number of required JSON files in the directory
+# above its checkpoints, but the methods that load the model and the processor
+# can't find them there.  If needed, copy them all from the model checkpoint's
+# parent directory into the checkpoint's directory.
+config_json = ['preprocessor_config.json', 'special_tokens_map.json', \
+    'tokenizer_config.json', 'vocab.json']
+for config_fn in config_json:
+    config_in_model_dir = os.path.join(model_dir, config_fn)
+    config_in_model_dir_parent = os.path.join(model_dir, os.pardir, config_fn)
+    if not os.path.isfile(config_in_model_dir) and \
+           os.path.isfile(config_in_model_dir_parent):
+        shutil.copy(config_in_model_dir_parent, config_in_model_dir)
+
+# File names passed in via the ELAN recognizer may have certain characters
+# XML/HTML-escaped (e.g., "&apos;" for "'", etc.).  Turn those back into
+# their non-escaped equivalents before using these as references to actual
+# files below.
+params['source'] = html.unescape(params['source'])
+
 # Use ffmpeg(1) to convert the 'source' audio file into a temporary 16-bit
 # mono 16KHz WAV, then load that into pydub for quicker processing.
 ##print("PROGRESS: 0.2 Converting source audio", flush = True)
@@ -177,7 +193,8 @@ if use_word_beam_search:
     # Initialize a word beam search, using the given corpus as the source for
     # an internal dictionary and (unigram and bigram) language model and the
     # given lists of characters to determine what can make up an orthographic
-    # word in Tsuut'ina.
+    # word in the target language.
+    import word_beam_search
     wbs = word_beam_search.WordBeamSearch(25, 'NGrams', 0.0, \
         corpus.encode('utf-8'), vocab_chars.encode('utf-8'), \
         word_chars.encode('utf-8'))
@@ -187,6 +204,11 @@ if use_word_beam_search:
 # in 'output'.
 num_annotations = len(annotations)
 for (i, a) in enumerate(annotations):
+    # Skip any annotations that are shorter than the minimum annotation length.
+    if a['end'] - a['start'] < MIN_ANNOTATION_DUR:
+        a['output'] = ''
+        continue
+
     # Extract the audio for this annotation from the converted audio that was
     # loaded using pydub, then convert that into a NumPy array with dtype =
     # np.float32 and a value range normalized to [-1.0, 1.0].  The line that
@@ -235,8 +257,12 @@ for (i, a) in enumerate(annotations):
     else:
         a['output'] = label
 
+    # Scale back the progress to always be less than 100% (to keep ELAN from
+    # displaying a warning and/or tier creation dialog before we're done
+    # producing our XML output below).
+    progress = max(0, min(1.0, (i / num_annotations)) - 0.01)
     print("PROGRESS: %.2f Processing annotation %d of %d" % \
-        (i / num_annotations, i + 1, num_annotations), flush = True)
+        (progress, i + 1, num_annotations), flush = True)
 
 # Write all of the output annotations to 'output_tier'.
 with open(params['output_tier'], 'w', encoding = 'utf-8') as output_tier:

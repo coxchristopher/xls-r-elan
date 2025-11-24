@@ -9,19 +9,19 @@ from directly within ELAN's user interface.
 
 This repository also contains several scripts used to fine-tune XLS-R models
 using [Digital Research Alliance of Canada](https://alliancecan.ca)
-high-performance computing facilities.  While specific to one specific language
-(Tsuut'ina), both the fine-tuning scripts (Python) and SLURM job definitions
-(sh) found in the `finetune-srs` directory may be useful as examples of how to
-fine-tune XLS-R models, in general.
+high-performance computing facilities.  While parts of these fine-tuning are
+specific to one particular language (Tsuut'ina), both the fine-tuning scripts
+(Python) and SLURM job definitions (sh) found in the `finetune-srs` directory
+may be useful as examples of how to fine-tune XLS-R models, in general.
 
 ## Requirements and installation
 
 XLS-R-ELAN makes use of several of other open-source applications and
 utilities:
 
-* [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) (tested with ELAN 6.4
-  under macOS 13.1)
-* [Python 3](https://www.python.org/) (tested with Python 3.10)
+* [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) (tested with ELAN 6.4-7.0
+  under macOS 13-15 \[Intel and Mac Silicon\], and Windows 11 \[Intel, 64-bit\])
+* [Python 3](https://www.python.org/) (tested with Python 3.9)
 * [ffmpeg](https://ffmpeg.org)
 
 XLS-R-ELAN is written in Python 3, and also depends on the following
@@ -37,9 +37,9 @@ Python packages, all of which should be installed in a virtual environment:
 * [pydub](https://github.com/jiaaro/pydub), installed in the same
    virtual environment as XLS-R-ELAN (tested with v0.25.1)
 * [CTCWordBeamSearch](https://github.com/githubharald/CTCWordBeamSearch),
-   installed in the same virtual environment as the above.
+   installed in the same virtual environment as the above (optional).
 
-Under macOS 13.1, the following commands can be used to fetch and install the
+Under macOS 13-15, the following commands can be used to fetch and install the
 necessary Python packages:
 ```
 git clone https://github.com/coxchristopher/xls-r-elan
@@ -53,7 +53,15 @@ pip install huggingface_hub==0.1
 pip install numpy
 pip install torch
 pip install pydub
+```
 
+If you want to use the optional word-beam search feature, allowing recognition
+to be guided by the distribution of words in a provided text corpus in the
+target language, Harald Scheidl's 
+[CTCWordBeamSearch](https://github.com/githubharald/CTCWordBeamSearch)
+package must also be installed:
+
+```
 git clone https://github.com/githubharald/CTCWordBeamSearch
 cd CTCWordBeamSearch
 pip install .
@@ -72,18 +80,19 @@ word_beam_search_ext = Extension('word_beam_search', sources=src, \
 Once all of these tools and packages have been installed, XLS-R-ELAN can
 be made available to ELAN as follows:
 
-1. Edit the file `xls-r-elan.sh` to specify (a) the directory in
-   which ffmpeg is located, and (b) a Unicode-friendly language and
-   locale (if `en_US.UTF-8` isn't available on your computer).
+1. Edit the file `xls-r-elan.sh` (macOS) or `xls-r-elan.bat` (Windows) to
+   specify (a) the directory in which ffmpeg is located, and (b) a
+   Unicode-friendly language and locale (if `en_US.UTF-8` isn't available on
+   your computer).
 2. To make XLS-R-ELAN available to ELAN, move your XLS-R-ELAN directory
    into ELAN's `extensions` directory.  This directory is found in different
    places under different operating systems:
    
-   * Under macOS, right-click on `ELAN_6.4` in your `/Applications`
+   * Under macOS, right-click on `ELAN_7.0` in your `/Applications`
      folder and select "Show Package Contents", then copy your `XLS-R-ELAN`
-     folder into `ELAN_6.4.app/Contents/app/extensions`.
-   * Under Linux, copy your `XLS-R-ELAN` folder into `ELAN_6-4/app/extensions`.
-   * Under Windows, copy your `XLS-R-ELAN` folder into `C:\Users\AppData\Local\ELAN_6-4\app\extensions`.
+     folder into `ELAN_7.0.app/Contents/app/extensions`.
+   * Under Linux, copy your `XLS-R-ELAN` folder into `ELAN_7-0/app/extensions`.
+   * Under Windows, copy your `XLS-R-ELAN` folder into `C:\Users\AppData\Local\ELAN_7-0\app\extensions` or `C:\Program Files\ELAN_7-0\app\extensions`.
 
 Once ELAN is restarted, it will now include 'XLS-R speech recognition'
 in the list of Recognizers found under the 'Recognizer' tab in Annotation Mode.
@@ -103,8 +112,8 @@ the current transcript.
 ## Limitations
 
 This is an alpha release of XLS-R-ELAN, and has only been tested under macOS
-(13.1) with Python 3.10.  No support for Windows or Linux is included in this
-version.
+(13-15) and Windows (64-bit Intel) with Python 3.9.  No support for Linux is
+included in this version.
 
 In several places, the current XLS-R-ELAN source code includes references to
 the absolute paths of specific fine-tuned XLS-R models used in local testing.
@@ -131,13 +140,13 @@ for his help with issues related to ELAN's local recognizer specifications.
 If referring to this code in a publication, please consider using the following
 citation:
 
-> Cox, Christopher. 2023. XLS-R-ELAN: An implementation of XLS-R automatic speech recognition as a recognizer for ELAN. Version 0.1.0.
+> Cox, Christopher. 2023. XLS-R-ELAN: An implementation of XLS-R automatic speech recognition as a recognizer for ELAN. Version 0.2.0.
 
 ```
 @manual{cox23xlsrelan,
     title = {XLS-R-ELAN: An implementation of XLS-R automatic speech recognition as a recognizer for ELAN},
     author = {Christopher Cox},
     year = {2023}
-    note = {Version 0.1.0},
+    note = {Version 0.2.0},
     }
 ```
