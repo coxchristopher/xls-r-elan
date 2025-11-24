@@ -1,4 +1,4 @@
-# XLS-R-ELAN 0.1.0
+# XLS-R-ELAN 0.2.0
 
 XLS-R-ELAN integrates the automatic speech recognition (ASR) methods offered by
 [XLS-R](https://huggingface.co/facebook/wav2vec2-xls-r-300m) ([Babu et al.
