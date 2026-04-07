@@ -42,6 +42,7 @@
 
 import atexit
 import codecs
+import html
 import os
 import re
 import shutil
