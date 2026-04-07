@@ -45,14 +45,11 @@ necessary Python packages:
 git clone https://github.com/coxchristopher/xls-r-elan
 cd xls-r-elan
 
-python3 -m virtualenv venv-xls-r-elan
-source venv-xls-r-elan/bin/activate
+chmod +x xls-r-elan.sh
 
-pip install transformers==4.11.3
-pip install huggingface_hub==0.1
-pip install numpy
-pip install torch
-pip install pydub
+python3 -m venv venv-xls-r-elan
+source venv-xls-r-elan/bin/activate
+pip install -r requirements.txt
 ```
 
 If you want to use the optional word-beam search feature, allowing recognition
